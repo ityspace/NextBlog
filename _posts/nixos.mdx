@@ -1,0 +1,43 @@
+---
+title: "NixOS初探"
+date: "2022-04-27"
+description: "Try to NixOS"
+tags: ["NixOS", "Linux"]
+---
+
+> NixOS之前突然火起来了，群友们纷纷表述他们的心动之旅。不过我并没有急着使用，ArchLinux已经很优秀了。咱最近上手了**NixOS-on-droid**，可以让NixOS在安卓运行，体验后发现果然不错-
+
+## Table of Contents
+
+## 什么是NixOS?
+
+以下摘自**Anillc**对Luca Bruno (Lethalman) 在 2014 和 2015 年在博客上写的一系列文章的翻译[^1]
+
+[^1]: [Nix Pills 翻译](https://anillc.cn/2021/10/03/nix-pills-trans/#27-结论) --Anillc 20210221 updated
+
+大多数被广泛使用的软件包管理器 (dkg, rpm, …) 都会修改系统的全局状态. 如果一个包 foo-1.0 安装了一个二进制文件到 /usr/bin/foo , 除非你修改安装路径或者二进制文件的名字, 你就不能安装 foo-1.1 . 但是更改二进制文件的名字意味着破坏使用这个二进制文件的程序.
+
+Nix 很好地解决了所有这些人在包的层面上的问题.
+
+基本上是所有包 (包括不同路径下的不同版本) 的 store , 所有在 Nix store 里的包都是不可变的.
+
+这意味着什么? 这意味着你可以运行用 glibc-2.18 编译的 mysql 5.2 , glibc-2.19 编译的 mysql 5.5 . 你可以用 gcc 4.6 编译的 python 2.7 来运行你的 python 模块和 gcc 4.8 编译的 python 3 来运行同样的模块, 全部都在同一个系统里.
+
+换句话说: 没有依赖地狱, 甚至没有一个依赖解决算法, 直接从一个 derivations 依赖到另一个 derivations .
+
+## 进入环境
+
+![NixOS-on-droid](/Screenshot_2022-04-27-09-32-52-591_com.termux.nix.jpg)
+
+初始化NixOS
+
+```shell
+nix-shell -p
+```
+
+程序会自动下载必备的软件包。`nix-shell -p`后面跟软件名也可以安装软件, NixOS会自动配置PATH.。
+
+NixOS使用**channels**列表获取包。更新 channel 可以使用`nix-channel --update` , 这会下载新的 Nix 表达式 (包的描述), 创建 ~/.nix-defexpr/channels 下的新的 channels profile 的 generation .
+
+不过当你重启系统时，会发现它又回到初始状态。你可以用`nix-shell -p`重新安装，只是不用下载了。出现这种情况在于NixOS是一个函数式的系统，你需要把配置写入配置文件才能生效
+
